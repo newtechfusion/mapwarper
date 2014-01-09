@@ -16,3 +16,8 @@ gem "fastercsv"
 gem 'gdal', "0.0.5"
 gem 'passenger'
 gem 'capistrano'
+gem 'rvm-capistrano'
+gem 'ruby-debug'
+
+# Specify your gem's dependencies in mbtiles.gemspec
+gemspec
