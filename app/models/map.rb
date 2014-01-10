@@ -245,6 +245,13 @@ class Map < ActiveRecord::Base
     File.join(dest_dir, "/png/")
   end
 
+  ##################
+  #added the mbtiles
+  def warped_mbtiles_dir
+    File.join(dest_dir, "/mbtiles/")
+  end
+   ###################
+
   def warped_png
     unless File.exists?(warped_png_filename)
       convert_to_png
@@ -260,13 +267,33 @@ class Map < ActiveRecord::Base
     warped_png + ".aux.xml"
   end
 
+  ###################
+  #mbtiles
+
+  def wraped_mbtiles
+    unless File.exists?(warped_mbtiles_filename)
+      convert_to_mbtiles
+    end
+    warped_mbtiles_filename
+  end
+
+  def warped_mbtiles_filename
+    filenamembtiles =File.join(warped_mbtiles_dir,id.to_s) + ".mbtiles"
+  end
+  ###################
+  
   def public_warped_tif_url
     "mapimages/dst/"+id.to_s + ".tif"
   end
   
+  
   def public_warped_png_url
     public_warped_tif_url + ".png"
   end
+
+  # def public_warped_mbtiles_url
+  #   public_warped_png_url + ".mbtiles"
+  # end
 
   def mask_file_format
     "gml"
@@ -680,6 +707,8 @@ class Map < ActiveRecord::Base
       end
          spawn do
            convert_to_png
+           convert_to_mbtiles
+
          end
       self.touch(:rectified_at)
     else
@@ -800,6 +829,7 @@ class Map < ActiveRecord::Base
   ############
 
    def convert_to_png
+    
      logger.info "start convert to png ->  #{warped_png_filename}"
      ext_command = "#{GDAL_PATH}gdal_translate -of png #{warped_filename} #{warped_png_filename}"
      stdin, stdout, stderr = Open3::popen3(ext_command)
@@ -811,6 +841,22 @@ class Map < ActiveRecord::Base
      else
        logger.info "end, converted to png -> #{warped_png_filename}"
      end
+   end
+
+   def convert_to_mbtiles
+    logger.info "start convert to mbtiles ->  #{warped_png_filename}"
+    debugger
+    mbtiles_command = "#{GDAL_PATH}gdal_translate -of mbtiles #{warped_mbtiles_filename} #{warped_png_filename}"
+    stdin, stdout, stderr = Open3::popen3(mbtiles_command)
+    logger.debug mbtiles_command
+    debugger
+    if stderr.readlines.to_s.size > 0
+      logger.error "ERROR convert png #{warped_mbtiles_filename} -> #{warped_png_filename}"
+      logger.error stderr.readlines.to_s
+      logger.error stdout.readlines.to_s
+    else
+      logger.info "end, converted to mbtiles -> #{warped_png_filename}"
+    end
    end
 
    #uses Yahoo Geo placemaker to get the places mentioned in the title and description
