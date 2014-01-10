@@ -19,5 +19,3 @@ gem 'capistrano'
 gem 'rvm-capistrano'
 gem 'ruby-debug'
 
-# Specify your gem's dependencies in mbtiles.gemspec
-gemspec
